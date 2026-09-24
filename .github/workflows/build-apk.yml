@@ -30,8 +30,7 @@ jobs:
           mkdir -p app/src/main/assets
           mkdir -p app/src/main/res/values
           mkdir -p app/src/main/res/drawable
-          magick app-icon.png -resize 192x192 app/src/main/res/drawable/app_icon.png
-
+          cp app-icon.png app/src/main/res/drawable/app_icon.png
           cp index-3.html app/src/main/assets/index.html
 
           cat > settings.gradle <<'EOF'
