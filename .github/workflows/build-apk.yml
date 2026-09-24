@@ -34,7 +34,7 @@ jobs:
           
           cp index-3.html app/src/main/assets/index.html
 
-                   cat > settings.gradle <<'EOF'
+          cat > settings.gradle <<'EOF'
           pluginManagement {
               repositories {
                   google()
