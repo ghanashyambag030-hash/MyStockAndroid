@@ -40,29 +40,30 @@ td{padding:8px;border-bottom:1px solid #e2e8f0;vertical-align:middle}
 .note{padding:8px 10px;font-size:13px;background:#fff7ed;border-left:4px solid #f97316;margin:10px}
 .wallpaper-btn{position:relative;overflow:hidden}
 #wallpaperInput{display:none}
-.duplicate{color:#b91c1c;background:#fee2e2!important}
+.duplicate{color:#b91c1c;background:#fee2e2!important}.info-btn{position:absolute;right:10px;top:10px;width:34px;height:34px;padding:0;border-radius:50%;background:#fff;color:#2563eb;font-size:21px;font-weight:800;line-height:34px}.info-modal .box{text-align:center;max-width:380px}.info-title{font-size:24px;font-weight:800;margin-bottom:12px}.info-line{margin:8px 0;font-size:15px}.info-close{margin-top:12px;width:100%}
 @media(max-width:600px){header h1{font-size:19px}.toolbar{position:static}button{padding:8px 10px}.wrap{padding:6px}}
 </style>
 </head>
 <body>
-<header>
-  <h1>📦 Stock Manager</h1>
-  <div class="sub">Product → Brand → Model | ডেটা ফোনেই সংরক্ষিত থাকবে</div>
+<header style="position:relative">
+  <button id="infoBtn" class="info-btn" title="App Info">тУШ</button>
+  <h1>ЁЯУж Stock Manager</h1>
+  <div class="sub">Product тЖТ Brand тЖТ Model | ржбрзЗржЯрж╛ ржлрзЛржирзЗржЗ рж╕ржВрж░ржХрзНрж╖рж┐ржд ржерж╛ржХржмрзЗ</div>
 </header>
 
 <div class="toolbar">
-  <input id="search" placeholder="🔎 Product / Brand / Model / Description খুঁজুন">
-  <button id="addProductBtn">＋ Product</button>
-  <button id="addBrandBtn" class="purple">＋ Brand</button>
-  <button id="addModelBtn" class="green">＋ Model</button>
-  <button id="pdfBtn" class="secondary">📄 Selected PDF</button>
+  <input id="search" placeholder="ЁЯФО Product / Brand / Model / Description ржЦрзБржБржЬрзБржи">
+  <button id="addProductBtn">я╝Л Product</button>
+  <button id="addBrandBtn" class="purple">я╝Л Brand</button>
+  <button id="addModelBtn" class="green">я╝Л Model</button>
+  <button id="pdfBtn" class="secondary">ЁЯУД Selected PDF</button>
   <label class="wallpaper-btn button" style="background:#f59e0b;color:#fff;border-radius:8px;padding:9px 12px;font-weight:700;cursor:pointer">
-    🖼️ Wallpaper <input id="wallpaperInput" type="file" accept="image/*">
+    ЁЯЦ╝я╕П Wallpaper <input id="wallpaperInput" type="file" accept="image/*">
   </label>
   <button id="clearWallpaperBtn" class="secondary">Clear Wallpaper</button>
 </div>
 
-<div class="note">💡 আগে Product তৈরি করুন → তারপর সেই Product-এর মধ্যে Brand → তারপর Brand-এর মধ্যে Model যোগ করুন। PDF-তে শুধু ☑️ করা Model যাবে।</div>
+<div class="note">ЁЯТб ржЖржЧрзЗ Product рждрзИрж░рж┐ ржХрж░рзБржи тЖТ рждрж╛рж░ржкрж░ рж╕рзЗржЗ Product-ржПрж░ ржоржзрзНржпрзЗ Brand тЖТ рждрж╛рж░ржкрж░ Brand-ржПрж░ ржоржзрзНржпрзЗ Model ржпрзЛржЧ ржХрж░рзБржиред PDF-рждрзЗ рж╢рзБржзрзБ тШСя╕П ржХрж░рж╛ Model ржпрж╛ржмрзЗред</div>
 
 <div class="wrap">
 <table>
@@ -71,6 +72,17 @@ td{padding:8px;border-bottom:1px solid #e2e8f0;vertical-align:middle}
 </tr></thead>
 <tbody id="stockBody"></tbody>
 </table>
+</div>
+
+<div id="infoModal" class="modal info-modal">
+ <div class="box">
+   <div class="info-title">ЁЯУж My Stock</div>
+   <div class="info-line">ЁЯСд <b>Created by:</b> Ghanashyam Bag</div>
+   <div class="info-line">ЁЯУ▒ <b>App Version:</b> 1.0</div>
+   <div class="info-line">ЁЯУз <b>Contact:</b><br><a href="mailto:ghanashyambag030@gmail.com">ghanashyambag030@gmail.com</a></div>
+   <div class="info-line">┬й Created by Ghanashyam Bag</div>
+   <button id="closeInfoBtn" class="secondary info-close">Close</button>
+ </div>
 </div>
 
 <div id="modal" class="modal">
@@ -117,8 +129,8 @@ function esc(v){
 }
 function money(v){
   const n = Number(v);
-  if(!Number.isFinite(n)) return "₹0.00";
-  return "₹" + n.toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+  if(!Number.isFinite(n)) return "тВ╣0.00";
+  return "тВ╣" + n.toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 function getProduct(pi){ return data[pi]; }
 function getBrand(pi,bi){ return data[pi]?.brands?.[bi]; }
@@ -139,6 +151,12 @@ function closeModal(){
 $("cancelModalBtn").addEventListener("click", closeModal);
 $("modal").addEventListener("click", e => { if(e.target === $("modal")) closeModal(); });
 
+$("infoBtn").addEventListener("click", () => $("infoModal").classList.add("show"));
+$("closeInfoBtn").addEventListener("click", () => $("infoModal").classList.remove("show"));
+$("infoModal").addEventListener("click", e => {
+  if(e.target === $("infoModal")) $("infoModal").classList.remove("show");
+});
+
 $("saveModalBtn").addEventListener("click", ()=>{
   if(typeof modalState === "function"){
     const ok = modalState();
@@ -154,13 +172,13 @@ function brandOptions(pi){
 }
 
 $("addProductBtn").addEventListener("click", ()=>{
-  openModal("➕ Add Product", `
-    <div class="field"><label>Product Name</label><input id="fName" placeholder="যেমন Monitor"></div>`,
+  openModal("тЮХ Add Product", `
+    <div class="field"><label>Product Name</label><input id="fName" placeholder="ржпрзЗржоржи Monitor"></div>`,
     ()=>{
       const name=$("fName").value.trim();
-      if(!name){alert("Product Name লিখুন");return false;}
+      if(!name){alert("Product Name рж▓рж┐ржЦрзБржи");return false;}
       if(data.some(p=>p.name.toLowerCase()===name.toLowerCase())){
-        alert("এই Product আগে থেকেই আছে। একই Product-এর জন্য নতুন Brand যোগ করুন।");
+        alert("ржПржЗ Product ржЖржЧрзЗ ржерзЗржХрзЗржЗ ржЖржЫрзЗред ржПржХржЗ Product-ржПрж░ ржЬржирзНржп ржирждрзБржи Brand ржпрзЛржЧ ржХрж░рзБржиред");
         return false;
       }
       data.push({id:uid("p"),name,brands:[]});
@@ -169,17 +187,17 @@ $("addProductBtn").addEventListener("click", ()=>{
 });
 
 $("addBrandBtn").addEventListener("click", ()=>{
-  if(!data.length){alert("আগে একটি Product তৈরি করুন।");return;}
-  openModal("➕ Add Brand", `
+  if(!data.length){alert("ржЖржЧрзЗ ржПржХржЯрж┐ Product рждрзИрж░рж┐ ржХрж░рзБржиред");return;}
+  openModal("тЮХ Add Brand", `
     <div class="field"><label>Product</label><select id="fProduct">${productOptions()}</select></div>
-    <div class="field"><label>Brand Name</label><input id="fName" placeholder="যেমন Samsung"></div>`,
+    <div class="field"><label>Brand Name</label><input id="fName" placeholder="ржпрзЗржоржи Samsung"></div>`,
     ()=>{
       const pi=Number($("fProduct").value), name=$("fName").value.trim();
-      if(!name){alert("Brand Name লিখুন");return false;}
+      if(!name){alert("Brand Name рж▓рж┐ржЦрзБржи");return false;}
       const p=data[pi]; if(!p) return false;
       p.brands ||= [];
       if(p.brands.some(b=>b.name.toLowerCase()===name.toLowerCase())){
-        alert("এই Brand এই Product-এর মধ্যে আগে থেকেই আছে."); return false;
+        alert("ржПржЗ Brand ржПржЗ Product-ржПрж░ ржоржзрзНржпрзЗ ржЖржЧрзЗ ржерзЗржХрзЗржЗ ржЖржЫрзЗ."); return false;
       }
       p.brands.push({id:uid("b"),name,models:[]});
       saveData(); render(); return true;
@@ -187,22 +205,22 @@ $("addBrandBtn").addEventListener("click", ()=>{
 });
 
 $("addModelBtn").addEventListener("click", ()=>{
-  if(!data.length){alert("আগে Product তৈরি করুন।");return;}
-  openModal("➕ Add Model", `
+  if(!data.length){alert("ржЖржЧрзЗ Product рждрзИрж░рж┐ ржХрж░рзБржиред");return;}
+  openModal("тЮХ Add Model", `
     <div class="field"><label>Product</label><select id="fProduct">${productOptions()}</select></div>
     <div class="field"><label>Brand</label><select id="fBrand"></select></div>
-    <div class="field"><label>Model</label><input id="fModel" placeholder="যেমন M24"></div>
+    <div class="field"><label>Model</label><input id="fModel" placeholder="ржпрзЗржоржи M24"></div>
     <div class="field"><label>Description</label><textarea id="fDesc" rows="3" placeholder="Description"></textarea></div>
     <div class="row">
-      <div class="field"><label>Price (₹)</label><input id="fPrice" type="number" min="0" step="0.01" placeholder="12500"></div>
+      <div class="field"><label>Price (тВ╣)</label><input id="fPrice" type="number" min="0" step="0.01" placeholder="12500"></div>
       <div class="field"><label>Stock</label><input id="fStock" type="number" min="0" step="1" value="0"></div>
     </div>`,
     ()=>{
       const pi=Number($("fProduct").value), bi=Number($("fBrand").value);
       const b=data[pi]?.brands?.[bi];
-      if(!b){alert("Brand নির্বাচন করুন");return false;}
+      if(!b){alert("Brand ржирж┐рж░рзНржмрж╛ржЪржи ржХрж░рзБржи");return false;}
       const model=$("fModel").value.trim();
-      if(!model){alert("Model লিখুন");return false;}
+      if(!model){alert("Model рж▓рж┐ржЦрзБржи");return false;}
       b.models ||= [];
       b.models.push({
         id:uid("m"), model,
@@ -222,15 +240,15 @@ $("addModelBtn").addEventListener("click", ()=>{
 
 function editModel(pi,bi,mi){
   const m=data[pi].brands[bi].models[mi];
-  openModal("✏️ Edit Model", `
+  openModal("тЬПя╕П Edit Model", `
     <div class="field"><label>Model</label><input id="fModel" value="${esc(m.model)}"></div>
     <div class="field"><label>Description</label><textarea id="fDesc" rows="3">${esc(m.description)}</textarea></div>
     <div class="row">
-      <div class="field"><label>Price (₹)</label><input id="fPrice" type="number" min="0" step="0.01" value="${Number(m.price)||0}"></div>
+      <div class="field"><label>Price (тВ╣)</label><input id="fPrice" type="number" min="0" step="0.01" value="${Number(m.price)||0}"></div>
       <div class="field"><label>Stock</label><input id="fStock" type="number" min="0" step="1" value="${Number(m.stock)||0}"></div>
     </div>`,
     ()=>{
-      const model=$("fModel").value.trim(); if(!model){alert("Model লিখুন");return false;}
+      const model=$("fModel").value.trim(); if(!model){alert("Model рж▓рж┐ржЦрзБржи");return false;}
       m.model=model;m.description=$("fDesc").value.trim();
       m.price=Math.max(0,Number($("fPrice").value)||0);
       if(!m.color) m.color="#ffffff";
@@ -239,18 +257,18 @@ function editModel(pi,bi,mi){
     });
 }
 function deleteModel(pi,bi,mi){
-  if(confirm("এই Model delete করবেন?")){
+  if(confirm("ржПржЗ Model delete ржХрж░ржмрзЗржи?")){
     selected.delete(data[pi].brands[bi].models[mi].id);
     data[pi].brands[bi].models.splice(mi,1); saveData(); render();
   }
 }
 function deleteBrand(pi,bi){
-  if(confirm("এই Brand এবং এর সব Model delete করবেন?")){
+  if(confirm("ржПржЗ Brand ржПржмржВ ржПрж░ рж╕ржм Model delete ржХрж░ржмрзЗржи?")){
     data[pi].brands.splice(bi,1); saveData(); render();
   }
 }
 function deleteProduct(pi){
-  if(confirm("এই Product এবং এর সব Brand/Model delete করবেন?")){
+  if(confirm("ржПржЗ Product ржПржмржВ ржПрж░ рж╕ржм Brand/Model delete ржХрж░ржмрзЗржи?")){
     data.splice(pi,1); saveData(); render();
   }
 }
@@ -259,15 +277,15 @@ function addBrandForProduct(pi){
   const p=data[pi];
   if(!p) return;
 
-  openModal("➕ Add Brand", `
+  openModal("тЮХ Add Brand", `
     <div class="field"><label>Product</label><input value="${esc(p.name)}" disabled></div>
-    <div class="field"><label>Brand Name</label><input id="fName" placeholder="যেমন Samsung"></div>`,
+    <div class="field"><label>Brand Name</label><input id="fName" placeholder="ржпрзЗржоржи Samsung"></div>`,
     ()=>{
       const name=$("fName").value.trim();
-      if(!name){alert("Brand Name লিখুন");return false;}
+      if(!name){alert("Brand Name рж▓рж┐ржЦрзБржи");return false;}
       p.brands ||= [];
       if(p.brands.some(b=>b.name.toLowerCase()===name.toLowerCase())){
-        alert("এই Brand এই Product-এর মধ্যে আগে থেকেই আছে.");
+        alert("ржПржЗ Brand ржПржЗ Product-ржПрж░ ржоржзрзНржпрзЗ ржЖржЧрзЗ ржерзЗржХрзЗржЗ ржЖржЫрзЗ.");
         return false;
       }
       p.brands.push({id:uid("b"),name,models:[]});
@@ -283,8 +301,8 @@ function render(){
   let anyVisible=false;
 
   data.forEach((p,pi)=>{
-    // Product নিজে সবসময় দেখাবে — Brand/Model না থাকলেও
-    // Search করলে Product name match হলে পুরো Product section দেখাবে।
+    // Product ржирж┐ржЬрзЗ рж╕ржмрж╕ржорзЯ ржжрзЗржЦрж╛ржмрзЗ тАФ Brand/Model ржирж╛ ржерж╛ржХрж▓рзЗржУ
+    // Search ржХрж░рж▓рзЗ Product name match рж╣рж▓рзЗ ржкрзБрж░рзЛ Product section ржжрзЗржЦрж╛ржмрзЗред
     const productMatch = !q || String(p.name||"").toLowerCase().includes(q);
 
     let brandParts=[];
@@ -306,11 +324,11 @@ function render(){
         let part=`<tr class="brand-row">
           <td></td>
           <td colspan="6">
-            🏷️ ${esc(b.name)}
+            ЁЯП╖я╕П ${esc(b.name)}
             <span class="muted">(${(b.models||[]).length} model)</span>
           </td>
           <td class="check">
-            <button class="red" data-act="deleteBrand" data-pi="${pi}" data-bi="${bi}">✕</button>
+            <button class="red" data-act="deleteBrand" data-pi="${pi}" data-bi="${bi}">тЬХ</button>
           </td>
         </tr>`;
 
@@ -324,14 +342,14 @@ function render(){
             <td class="price">${money(m.price)}</td>
             <td class="stock-cell">
               <div class="actions">
-                <button data-act="minus" data-pi="${pi}" data-bi="${bi}" data-mi="${mi}">−</button>
+                <button data-act="minus" data-pi="${pi}" data-bi="${bi}" data-mi="${mi}">тИТ</button>
                 <input class="stock-input" data-stock="${pi},${bi},${mi}" type="number" min="0" value="${Number(m.stock)||0}">
-                <button data-act="plus" data-pi="${pi}" data-bi="${bi}" data-mi="${mi}">＋</button>
+                <button data-act="plus" data-pi="${pi}" data-bi="${bi}" data-mi="${mi}">я╝Л</button>
               </div>
             </td>
             <td>
               <div class="actions">
-                <input class="color-picker" type="color" value="${rowColor}" title="এই Model Row-এর Color" data-color="${pi},${bi},${mi}">
+                <input class="color-picker" type="color" value="${rowColor}" title="ржПржЗ Model Row-ржПрж░ Color" data-color="${pi},${bi},${mi}">
                 <button data-act="edit" data-pi="${pi}" data-bi="${bi}" data-mi="${mi}">Edit</button>
                 <button class="red" data-act="deleteModel" data-pi="${pi}" data-bi="${bi}" data-mi="${mi}">Delete</button>
               </div>
@@ -346,28 +364,28 @@ function render(){
       }
     });
 
-    // Product name সবসময় দৃশ্যমান থাকবে।
-    // Product-এর মধ্যে Brand না থাকলেও Product row দেখা যাবে।
+    // Product name рж╕ржмрж╕ржорзЯ ржжрзГрж╢рзНржпржорж╛ржи ржерж╛ржХржмрзЗред
+    // Product-ржПрж░ ржоржзрзНржпрзЗ Brand ржирж╛ ржерж╛ржХрж▓рзЗржУ Product row ржжрзЗржЦрж╛ ржпрж╛ржмрзЗред
     if(!q || productMatch || hasMatchingBrandOrModel){
       anyVisible=true;
       html+=`<tr class="product-row">
-        <td colspan="6">📦 ${esc(p.name)}</td>
+        <td colspan="6">ЁЯУж ${esc(p.name)}</td>
         <td>
-          <button class="blue" data-act="addBrand" data-pi="${pi}">＋ Brand</button>
-          <button class="red" data-act="deleteProduct" data-pi="${pi}">✕</button>
+          <button class="blue" data-act="addBrand" data-pi="${pi}">я╝Л Brand</button>
+          <button class="red" data-act="deleteProduct" data-pi="${pi}">тЬХ</button>
         </td>
         <td class="check"></td>
       </tr>`;
 
       html+=brandParts.join("");
 
-      // Brand না থাকলে স্পষ্টভাবে দেখাবে
+      // Brand ржирж╛ ржерж╛ржХрж▓рзЗ рж╕рзНржкрж╖рзНржЯржнрж╛ржмрзЗ ржжрзЗржЦрж╛ржмрзЗ
       if(!(p.brands||[]).length){
         html+=`<tr>
           <td></td>
           <td colspan="7" class="empty">
-            এই Product-এর জন্য এখনও কোনো Brand নেই।
-            <button class="blue" data-act="addBrand" data-pi="${pi}">＋ Brand যোগ করুন</button>
+            ржПржЗ Product-ржПрж░ ржЬржирзНржп ржПржЦржиржУ ржХрзЛржирзЛ Brand ржирзЗржЗред
+            <button class="blue" data-act="addBrand" data-pi="${pi}">я╝Л Brand ржпрзЛржЧ ржХрж░рзБржи</button>
           </td>
         </tr>`;
       }
@@ -376,7 +394,7 @@ function render(){
 
   body.innerHTML = anyVisible
     ? html
-    : `<tr><td colspan="8" class="empty">কোনো matching item পাওয়া যায়নি।</td></tr>`;
+    : `<tr><td colspan="8" class="empty">ржХрзЛржирзЛ matching item ржкрж╛ржУрзЯрж╛ ржпрж╛рзЯржирж┐ред</td></tr>`;
 }
 
 $("search").addEventListener("input",render);
@@ -418,9 +436,9 @@ $("pdfBtn").addEventListener("click",()=>{
   data.forEach(p=>(p.brands||[]).forEach(b=>(b.models||[]).forEach(m=>{
     if(selected.has(m.id)) rows.push({product:p.name,brand:b.name,...m});
   })));
-  if(!rows.length){alert("PDF-এর জন্য আগে অন্তত একটি Model ☑️ Select করুন।");return;}
+  if(!rows.length){alert("PDF-ржПрж░ ржЬржирзНржп ржЖржЧрзЗ ржЕржирзНрждржд ржПржХржЯрж┐ Model тШСя╕П Select ржХрж░рзБржиред");return;}
   const w=window.open("","_blank");
-  if(!w){alert("Browser popup বন্ধ আছে। Popup allow করে আবার চাপুন।");return;}
+  if(!w){alert("Browser popup ржмржирзНржз ржЖржЫрзЗред Popup allow ржХрж░рзЗ ржЖржмрж╛рж░ ржЪрж╛ржкрзБржиред");return;}
   w.document.write(`<!doctype html><html><head><meta charset="UTF-8"><title>Selected Stock</title>
   <style>
   body{font-family:Arial;padding:20px}
@@ -435,42 +453,3 @@ $("pdfBtn").addEventListener("click",()=>{
     .model-row td{background-color:var(--pdf-row-color) !important}
   }
   </style>
-  </head><body><h1>Selected Stock</h1><table><tr><th>Product</th><th>Brand</th><th>Model</th><th>Description</th><th>Price</th><th>Stock</th></tr>
-  ${rows.map(r=>{
-    const c=/^#[0-9a-fA-F]{6}$/.test(r.color||"")?r.color:"#ffffff";
-    return `<tr class="model-row" style="--pdf-row-color:${c};background-color:${c}"><td style="background-color:${c}">${esc(r.product)}</td><td style="background-color:${c}">${esc(r.brand)}</td><td style="background-color:${c}">${esc(r.model)}</td><td style="background-color:${c}">${esc(r.description)}</td><td style="background-color:${c}">${money(r.price)}</td><td style="background-color:${c}">${Number(r.stock)||0}</td></tr>`;
-  }).join("")}
-  </table><br><button onclick="window.print()">🖨️ Print / Save as PDF</button></body></html>`);
-  w.document.close();
-});
-
-$("wallpaperInput").addEventListener("change",e=>{
-  const file=e.target.files[0]; if(!file)return;
-  if(!file.type.startsWith("image/")){alert("একটি image নির্বাচন করুন।");return;}
-  const reader=new FileReader();
-  reader.onload=()=>{
-    const img=new Image();
-    img.onload=()=>{
-      const max=1200, scale=Math.min(1,max/Math.max(img.width,img.height));
-      const c=document.createElement("canvas");c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);
-      c.getContext("2d").drawImage(img,0,0,c.width,c.height);
-      try{localStorage.setItem(WALL_KEY,c.toDataURL("image/jpeg",0.78));applyWallpaper();}
-      catch(err){alert("ছবিটি খুব বড়। ছোট ছবি দিয়ে আবার চেষ্টা করুন।");}
-    };
-    img.src=reader.result;
-  };
-  reader.readAsDataURL(file);
-});
-function applyWallpaper(){
-  const w=localStorage.getItem(WALL_KEY);
-  if(w){document.body.style.backgroundImage=`linear-gradient(#eef3f8cc,#eef3f8cc),url("${w}")`;document.body.style.backgroundSize="cover";document.body.style.backgroundAttachment="fixed";}
-}
-$("clearWallpaperBtn").addEventListener("click",()=>{
-  localStorage.removeItem(WALL_KEY);document.body.style.backgroundImage="";alert("Wallpaper clear হয়েছে।");
-});
-
-applyWallpaper();
-render();
-</script>
-</body>
-</html>
