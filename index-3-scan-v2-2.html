@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stock Manager V5</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#eef3f8;color:#17212b}
+header{padding:14px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff}
+h1{margin:0 0 5px;font-size:22px}.sub{font-size:13px;opacity:.9}
+.toolbar{padding:10px;background:#fff;display:flex;flex-wrap:wrap;gap:7px;position:sticky;top:0;z-index:5;box-shadow:0 2px 8px #0001}
+button{border:0;border-radius:8px;padding:9px 12px;background:#2563eb;color:white;font-weight:700;cursor:pointer}
+button.secondary{background:#475569}button.green{background:#16a34a}button.red{background:#dc2626}
+button.purple{background:#7c3aed}
+input,textarea,select{font:inherit;border:1px solid #cbd5e1;border-radius:7px;padding:8px;background:#fff}
+#search{flex:1;min-width:180px}
+.wrap{padding:10px;overflow-x:auto}
+table{width:100%;min-width:980px;border-collapse:separate;border-spacing:0;background:#fff;border-radius:10px;overflow:hidden}
+th{background:#172554;color:#fff;padding:10px;text-align:left;position:sticky;top:0}
+td{padding:8px;border-bottom:1px solid #e2e8f0;vertical-align:middle}
+.product-row td{background:#dbeafe;font-weight:800;font-size:16px}
+.brand-row td{background:#ede9fe;font-weight:700}
+.model-row td{background:var(--row-color,#fff)}
+.color-picker{width:38px;height:32px;padding:2px;border:1px solid #cbd5e1;border-radius:6px;cursor:pointer;background:#fff}
+.desc-cell{background:#fff7cc!important}
+.stock-cell{background:#dcfce7!important;white-space:nowrap}
+.stock-input{width:70px;text-align:center}
+.price{font-weight:700;white-space:nowrap}
+.muted{color:#64748b;font-size:12px}
+.actions{display:flex;gap:5px;flex-wrap:wrap}
+.actions button{padding:6px 8px;font-size:12px}
+.check{text-align:center;width:50px}
+.empty{text-align:center;padding:30px;color:#64748b}
+.modal{display:none;position:fixed;inset:0;background:#0008;z-index:20;align-items:center;justify-content:center;padding:15px}
+.modal.show{display:flex}.box{background:#fff;border-radius:14px;padding:18px;width:min(500px,100%);max-height:90vh;overflow:auto}
+.box h2{margin-top:0}.field{margin:10px 0}.field label{display:block;font-weight:700;margin-bottom:5px}
+.field input,.field textarea,.field select{width:100%}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.note{padding:8px 10px;font-size:13px;background:#fff7ed;border-left:4px solid #f97316;margin:10px}
+.wallpaper-btn{position:relative;overflow:hidden}
+#wallpaperInput{display:none}
+.duplicate{color:#b91c1c;background:#fee2e2!important}
+.scan-btn{background:#0f766e!important}
+.scan-modal{display:none;position:fixed;inset:0;background:#0009;z-index:40;align-items:center;justify-content:center;padding:12px}
+.scan-modal.show{display:flex}.scan-box{background:#fff;border-radius:14px;padding:16px;width:min(560px,100%);max-height:92vh;overflow:auto}
+.scan-box h2{margin:0 0 8px}.scan-help{font-size:13px;color:#475569;margin:0 0 12px}.scan-actions{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.scan-preview{width:100%;max-height:240px;object-fit:contain;background:#f1f5f9;border-radius:10px;display:none;margin:8px 0}
+.scan-status{font-size:13px;padding:8px;border-radius:8px;background:#f1f5f9;margin:8px 0;white-space:pre-wrap}
+.scan-raw{width:100%;min-height:90px;margin-top:8px;font-size:12px;display:none}
+.scan-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}.scan-fields .field{margin:4px 0}
+@media(max-width:600px){.scan-fields{grid-template-columns:1fr}}
+@media(max-width:600px){header h1{font-size:19px}.toolbar{position:static}button{padding:8px 10px}.wrap{padding:6px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>📦 Stock Manager</h1>
+  <div class="sub">Product → Brand → Model | ডেটা ফোনেই সংরক্ষিত থাকবে</div>
+</header>
+
+<div class="toolbar">
+  <input id="search" placeholder="🔎 Product / Brand / Model / Description খুঁজুন">
+  <button id="addProductBtn">＋ Product</button>
+  <button id="addBrandBtn" class="purple">＋ Brand</button>
+  <button id="addModelBtn" class="green">＋ Model</button>
+  <button id="scanBtn" class="scan-btn">📷 Scan Product</button>
+  <button id="pdfBtn" class="secondary">📄 Selected PDF</button>
+  <label class="wallpaper-btn button" style="background:#f59e0b;color:#fff;border-radius:8px;padding:9px 12px;font-weight:700;cursor:pointer">
+    🖼️ Wallpaper <input id="wallpaperInput" type="file" accept="image/*">
+  </label>
+  <button id="clearWallpaperBtn" class="secondary">Clear Wallpaper</button>
+</div>
+
+<div class="note">💡 আগে Product তৈরি করুন → তারপর সেই Product-এর মধ্যে Brand → তারপর Brand-এর মধ্যে Model যোগ করুন। PDF-তে শুধু ☑️ করা Model যাবে।</div>
+
+<div class="wrap">
+<table>
+<thead><tr>
+<th>Product</th><th>Brand</th><th>Model</th><th>Description</th><th>Price</th><th>Stock</th><th>Action</th><th class="check">Select</th>
+</tr></thead>
+<tbody id="stockBody"></tbody>
+</table>
+</div>
+
+<div id="scanModal" class="scan-modal">
+ <div class="scan-box">
+  <h2>📷 Scan Product</h2>
+  <p class="scan-help">Packet-এর পরিষ্কার ছবি তুলুন বা Gallery থেকে নিন। Price ও Stock ফাঁকা থাকবে। Add করার আগে তথ্যগুলো ঠিক করে নিন।</p>
+  <div class="scan-actions">
+   <label class="button" style="background:#2563eb;color:#fff;border-radius:8px;padding:9px 12px;font-weight:700;cursor:pointer">📷 Camera <input id="scanCamera" type="file" accept="image/*" capture="environment" style="display:none"></label>
+   <label class="button" style="background:#475569;color:#fff;border-radius:8px;padding:9px 12px;font-weight:700;cursor:pointer">🖼️ Gallery <input id="scanGallery" type="file" accept="image/*" style="display:none"></label>
+  </div>
+  <img id="scanPreview" class="scan-preview" alt="Scan preview">
+  <div id="scanStatus" class="scan-status">ছবি নির্বাচন করুন।</div>
+  <div class="scan-fields">
+   <div class="field"><label>Product Name</label><input id="scanProduct" placeholder="যেমন Monitor"></div>
+   <div class="field"><label>Brand Name</label><input id="scanBrand" placeholder="যেমন Samsung"></div>
+   <div class="field"><label>Model Number</label><input id="scanModel" placeholder="যেমন M24"></div>
+   <div class="field"><label>Description</label><input id="scanDesc" placeholder="যেমন 68.5 cm"></div>
+   <div class="field"><label>Price (₹)</label><input id="scanPrice" type="number" min="0" step="0.01" placeholder="নিজে বসান"></div>
+   <div class="field"><label>Stock</label><input id="scanStock" type="number" min="0" step="1" placeholder="নিজে বসান"></div>
+  </div>
+  <textarea id="scanRaw" class="scan-raw" readonly placeholder="OCR যে লেখা পেয়েছে তা এখানে দেখা যাবে"></textarea>
+  <div class="row" style="margin-top:10px">
+   <button id="scanAddBtn" class="green">Add to Stock</button>
+   <button id="scanCancelBtn" class="secondary">Cancel</button>
+  </div>
+ </div>
+</div>
+
+<div id="modal" class="modal">
+ <div class="box">
+   <h2 id="modalTitle">Add</h2>
+   <div id="modalFields"></div>
+   <div class="row">
+     <button id="saveModalBtn" class="green">Save</button>
+     <button id="cancelModalBtn" class="secondary">Cancel</button>
+   </div>
+ </div>
+</div>
+
+<script>
+"use strict";
+
+const STORAGE_KEY = "stock_manager_v5_data";
+const WALL_KEY = "stock_manager_v5_wallpaper";
+
+let data = loadData();
+let selected = new Set();
+let modalState = null;
+
+const $ = id => document.getElementById(id);
+const body = $("stockBody");
+
+function uid(prefix){
+  return prefix + "_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2,8);
+}
+function loadData(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  }catch(e){ return []; }
+}
+function saveData(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+function esc(v){
+  return String(v ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+}
+function money(v){
+  const n = Number(v);
+  if(!Number.isFinite(n)) return "₹0.00";
+  return "₹" + n.toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function getProduct(pi){ return data[pi]; }
+function getBrand(pi,bi){ return data[pi]?.brands?.[bi]; }
+
+function openModal(title, fields, onSave){
+  $("modalTitle").textContent = title;
+  $("modalFields").innerHTML = fields;
+  modalState = onSave;
+  $("modal").classList.add("show");
+  const first = $("modalFields").querySelector("input,textarea,select");
+  if(first) setTimeout(()=>first.focus(),50);
+}
+function closeModal(){
+  $("modal").classList.remove("show");
+  modalState = null;
+  $("modalFields").innerHTML = "";
+}
+$("cancelModalBtn").addEventListener("click", closeModal);
+$("modal").addEventListener("click", e => { if(e.target === $("modal")) closeModal(); });
+
+$("saveModalBtn").addEventListener("click", ()=>{
+  if(typeof modalState === "function"){
+    const ok = modalState();
+    if(ok !== false) closeModal();
+  }
+});
+
+function productOptions(){
+  return data.map((p,i)=>`<option value="${i}">${esc(p.name)}</option>`).join("");
+}
+function brandOptions(pi){
+  return (data[pi]?.brands || []).map((b,i)=>`<option value="${i}">${esc(b.name)}</option>`).join("");
+}
+
+$("addProductBtn").addEventListener("click", ()=>{
+  openModal("➕ Add Product", `
+    <div class="field"><label>Product Name</label><input id="fName" placeholder="যেমন Monitor"></div>`,
+    ()=>{
+      const name=$("fName").value.trim();
+      if(!name){alert("Product Name লিখুন");return false;}
+      if(data.some(p=>p.name.toLowerCase()===name.toLowerCase())){
+        alert("এই Product আগে থেকেই আছে। একই Product-এর জন্য নতুন Brand যোগ করুন।");
+        return false;
+      }
+      data.push({id:uid("p"),name,brands:[]});
+      saveData(); render(); return true;
+    });
+});
+
+$("addBrandBtn").addEventListener("click", ()=>{
+  if(!data.length){alert("আগে একটি Product তৈরি করুন।");return;}
+  openModal("➕ Add Brand", `
+    <div class="field"><label>Product</label><select id="fProduct">${productOptions()}</select></div>
+    <div class="field"><label>Brand Name</label><input id="fName" placeholder="যেমন Samsung"></div>`,
+    ()=>{
+      const pi=Number($("fProduct").value), name=$("fName").value.trim();
+      if(!name){alert("Brand Name লিখুন");return false;}
+      const p=data[pi]; if(!p) return false;
+      p.brands ||= [];
+      if(p.brands.some(b=>b.name.toLowerCase()===name.toLowerCase())){
+        alert("এই Brand এই Product-এর মধ্যে আগে থেকেই আছে."); return false;
+      }
+      p.brands.push({id:uid("b"),name,models:[]});
+      saveData(); render(); return true;
+    });
+});
+
+$("addModelBtn").addEventListener("click", ()=>{
+  if(!data.length){alert("আগে Product তৈরি করুন।");return;}
+  openModal("➕ Add Model", `
+    <div class="field"><label>Product</label><select id="fProduct">${productOptions()}</select></div>
+    <div class="field"><label>Brand</label><select id="fBrand"></select></div>
+    <div class="field"><label>Model</label><input id="fModel" placeholder="যেমন M24"></div>
+    <div class="field"><label>Description</label><textarea id="fDesc" rows="3" placeholder="Description"></textarea></div>
+    <div class="row">
+      <div class="field"><label>Price (₹)</label><input id="fPrice" type="number" min="0" step="0.01" placeholder="12500"></div>
+      <div class="field"><label>Stock</label><input id="fStock" type="number" min="0" step="1" value="0"></div>
+    </div>`,
+    ()=>{
+      const pi=Number($("fProduct").value), bi=Number($("fBrand").value);
+      const b=data[pi]?.brands?.[bi];
+      if(!b){alert("Brand নির্বাচন করুন");return false;}
+      const model=$("fModel").value.trim();
+      if(!model){alert("Model লিখুন");return false;}
+      b.models ||= [];
+      b.models.push({
+        id:uid("m"), model,
+        description:$("fDesc").value.trim(),
+        price:Math.max(0,Number($("fPrice").value)||0),
+        color:"#ffffff",
+        stock:Math.max(0,parseInt($("fStock").value,10)||0)
+      });
+      saveData(); render(); return true;
+    });
+  setTimeout(()=>{
+    const ps=$("fProduct"), bs=$("fBrand");
+    function updateBrands(){bs.innerHTML=brandOptions(Number(ps.value));}
+    ps.addEventListener("change",updateBrands); updateBrands();
+  },20);
+});
+
+function editModel(pi,bi,mi){
+  const m=data[pi].brands[bi].models[mi];
+  openModal("✏️ Edit Model", `
+    <div class="field"><label>Model</label><input id="fModel" value="${esc(m.model)}"></div>
+    <div class="field"><label>Description</label><textarea id="fDesc" rows="3">${esc(m.description)}</textarea></div>
+    <div class="row">
+      <div class="field"><label>Price (₹)</label><input id="fPrice" type="number" min="0" step="0.01" value="${Number(m.price)||0}"></div>
+      <div class="field"><label>Stock</label><input id="fStock" type="number" min="0" step="1" value="${Number(m.stock)||0}"></div>
+    </div>`,
+    ()=>{
+      const model=$("fModel").value.trim(); if(!model){alert("Model লিখুন");return false;}
+      m.model=model;m.description=$("fDesc").value.trim();
+      m.price=Math.max(0,Number($("fPrice").value)||0);
+      if(!m.color) m.color="#ffffff";
+      m.stock=Math.max(0,parseInt($("fStock").value,10)||0);
+      saveData();render();return true;
+    });
+}
+function deleteModel(pi,bi,mi){
+  if(confirm("এই Model delete করবেন?")){
+    selected.delete(data[pi].brands[bi].models[mi].id);
+    data[pi].brands[bi].models.splice(mi,1); saveData(); render();
+  }
+}
+function deleteBrand(pi,bi){
+  if(confirm("এই Brand এবং এর সব Model delete করবেন?")){
+    data[pi].brands.splice(bi,1); saveData(); render();
+  }
+}
+function deleteProduct(pi){
+  if(confirm("এই Product এবং এর সব Brand/Model delete করবেন?")){
+    data.splice(pi,1); saveData(); render();
+  }
+}
+
+function addBrandForProduct(pi){
+  const p=data[pi];
+  if(!p) return;
+
+  openModal("➕ Add Brand", `
+    <div class="field"><label>Product</label><input value="${esc(p.name)}" disabled></div>
+    <div class="field"><label>Brand Name</label><input id="fName" placeholder="যেমন Samsung"></div>`,
+    ()=>{
+      const name=$("fName").value.trim();
+      if(!name){alert("Brand Name লিখুন");return false;}
+      p.brands ||= [];
+      if(p.brands.some(b=>b.name.toLowerCase()===name.toLowerCase())){
+        alert("এই Brand এই Product-এর মধ্যে আগে থেকেই আছে.");
+        return false;
+      }
+      p.brands.push({id:uid("b"),name,models:[]});
+      saveData();
+      render();
+      return true;
+    });
+}
+
+function render(){
+  const q=$("search").value.trim().toLowerCase();
+  let html="";
+  let anyVisible=false;
+
+  data.forEach((p,pi)=>{
+    // Product নিজে সবসময় দেখাবে — Brand/Model না থাকলেও
+    // Search করলে Product name match হলে পুরো Product section দেখাবে।
+    const productMatch = !q || String(p.name||"").toLowerCase().includes(q);
+
+    let brandParts=[];
+    let hasMatchingBrandOrModel=false;
+
+    (p.brands||[]).forEach((b,bi)=>{
+      const brandMatch = !q || String(b.name||"").toLowerCase().includes(q);
+
+      const models=(b.models||[]).map((m,mi)=>({m,mi})).filter(({m})=>{
+        if(!q || productMatch || brandMatch) return true;
+        return [m.model,m.description].some(x =>
+          String(x||"").toLowerCase().includes(q)
+        );
+      });
+
+      if(models.length || brandMatch || productMatch){
+        hasMatchingBrandOrModel=true;
+
+        let part=`<tr class="brand-row">
+          <td></td>
+          <td colspan="6">
+            🏷️ ${esc(b.name)}
+            <span class="muted">(${(b.models||[]).length} model)</span>
+          </td>
+          <td class="check">
+            <button class="red" data-act="deleteBrand" data-pi="${pi}" data-bi="${bi}">✕</button>
+          </td>
+        </tr>`;
+
+        models.forEach(({m,mi})=>{
+          anyVisible=true;
+          const rowColor = /^#[0-9a-fA-F]{6}$/.test(m.color || "") ? m.color : "#ffffff";
+          part+=`<tr class="model-row" style="--row-color:${rowColor}">
+            <td></td><td></td>
+            <td><b>${esc(m.model)}</b></td>
+            <td class="desc-cell">${esc(m.description)||'<span class="muted">No description</span>'}</td>
+            <td class="price">${money(m.price)}</td>
+            <td class="stock-cell">
+              <div class="actions">
+                <button data-act="minus" data-pi="${pi}" data-bi="${bi}" data-mi="${mi}">−</button>
+                <input class="stock-input" data-stock="${pi},${bi},${mi}" type="number" min="0" value="${Number(m.stock)||0}">
+                <button data-act="plus" data-pi="${pi}" data-bi="${bi}" data-mi="${mi}">＋</button>
+              </div>
+            </td>
+            <td>
+              <div class="actions">
+                <input class="color-picker" type="color" value="${rowColor}" title="এই Model Row-এর Color" data-color="${pi},${bi},${mi}">
+                <button data-act="edit" data-pi="${pi}" data-bi="${bi}" data-mi="${mi}">Edit</button>
+                <button class="red" data-act="deleteModel" data-pi="${pi}" data-bi="${bi}" data-mi="${mi}">Delete</button>
+              </div>
+            </td>
+            <td class="check">
+              <input type="checkbox" data-select="${esc(m.id)}" ${selected.has(m.id)?"checked":""}>
+            </td>
+          </tr>`;
+        });
+
+        brandParts.push(part);
+      }
+    });
+
+    // Product name সবসময় দৃশ্যমান থাকবে।
+    // Product-এর মধ্যে Brand না থাকলেও Product row দেখা যাবে।
+    if(!q || productMatch || hasMatchingBrandOrModel){
+      anyVisible=true;
+      html+=`<tr class="product-row">
+        <td colspan="6">📦 ${esc(p.name)}</td>
+        <td>
+          <button class="blue" data-act="addBrand" data-pi="${pi}">＋ Brand</button>
+          <button class="red" data-act="deleteProduct" data-pi="${pi}">✕</button>
+        </td>
+        <td class="check"></td>
+      </tr>`;
+
+      html+=brandParts.join("");
+
+      // Brand না থাকলে স্পষ্টভাবে দেখাবে
+      if(!(p.brands||[]).length){
+        html+=`<tr>
+          <td></td>
+          <td colspan="7" class="empty">
+            এই Product-এর জন্য এখনও কোনো Brand নেই।
+            <button class="blue" data-act="addBrand" data-pi="${pi}">＋ Brand যোগ করুন</button>
+          </td>
+        </tr>`;
+      }
+    }
+  });
+
+  body.innerHTML = anyVisible
+    ? html
+    : `<tr><td colspan="8" class="empty">কোনো matching item পাওয়া যায়নি।</td></tr>`;
+}
+
+$("search").addEventListener("input",render);
+
+body.addEventListener("click",e=>{
+  const b=e.target.closest("button[data-act]");
+  if(!b)return;
+  const act=b.dataset.act,pi=Number(b.dataset.pi),bi=Number(b.dataset.bi),mi=Number(b.dataset.mi);
+  if(act==="plus"){data[pi].brands[bi].models[mi].stock++;saveData();render();}
+  if(act==="minus"){data[pi].brands[bi].models[mi].stock=Math.max(0,data[pi].brands[bi].models[mi].stock-1);saveData();render();}
+  if(act==="addBrand") addBrandForProduct(pi);
+  if(act==="edit")editModel(pi,bi,mi);
+  if(act==="deleteModel")deleteModel(pi,bi,mi);
+  if(act==="deleteBrand")deleteBrand(pi,bi);
+  if(act==="deleteProduct")deleteProduct(pi);
+});
+
+body.addEventListener("change",e=>{
+  if(e.target.matches("input[data-stock]")){
+    const [pi,bi,mi]=e.target.dataset.stock.split(",").map(Number);
+    data[pi].brands[bi].models[mi].stock=Math.max(0,parseInt(e.target.value,10)||0);
+    saveData();render();
+  }
+  if(e.target.matches("input[data-color]")){
+    const [pi,bi,mi]=e.target.dataset.color.split(",").map(Number);
+    if(data[pi]?.brands?.[bi]?.models?.[mi]){
+      data[pi].brands[bi].models[mi].color=e.target.value;
+      saveData();render();
+    }
+  }
+  if(e.target.matches("input[data-select]")){
+    const id=e.target.dataset.select;
+    if(e.target.checked)selected.add(id);else selected.delete(id);
+  }
+});
+
+$("pdfBtn").addEventListener("click",()=>{
+  const rows=[];
+  data.forEach(p=>(p.brands||[]).forEach(b=>(b.models||[]).forEach(m=>{
+    if(selected.has(m.id)) rows.push({product:p.name,brand:b.name,...m});
+  })));
+  if(!rows.length){alert("PDF-এর জন্য আগে অন্তত একটি Model ☑️ Select করুন।");return;}
+  const w=window.open("","_blank");
+  if(!w){alert("Browser popup বন্ধ আছে। Popup allow করে আবার চাপুন।");return;}
+  w.document.write(`<!doctype html><html><head><meta charset="UTF-8"><title>Selected Stock</title>
+  <style>
+  body{font-family:Arial;padding:20px}
+  h1{text-align:center}
+  table{width:100%;border-collapse:collapse}
+  th,td{border:1px solid #555;padding:8px;text-align:left}
+  th{background:#eee}
+  .model-row{font-weight:500}
+  @media print{
+    button{display:none}
+    *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
+    .model-row td{background-color:var(--pdf-row-color) !important}
+  }
+  </style>
+  </head><body><h1>Selected Stock</h1><table><tr><th>Product</th><th>Brand</th><th>Model</th><th>Description</th><th>Price</th><th>Stock</th></tr>
+  ${rows.map(r=>{
+    const c=/^#[0-9a-fA-F]{6}$/.test(r.color||"")?r.color:"#ffffff";
+    return `<tr class="model-row" style="--pdf-row-color:${c};background-color:${c}"><td style="background-color:${c}">${esc(r.product)}</td><td style="background-color:${c}">${esc(r.brand)}</td><td style="background-color:${c}">${esc(r.model)}</td><td style="background-color:${c}">${esc(r.description)}</td><td style="background-color:${c}">${money(r.price)}</td><td style="background-color:${c}">${Number(r.stock)||0}</td></tr>`;
+  }).join("")}
+  </table><br><button onclick="window.print()">🖨️ Print / Save as PDF</button></body></html>`);
+  w.document.close();
+});
+
+$("wallpaperInput").addEventListener("change",e=>{
+  const file=e.target.files[0]; if(!file)return;
+  if(!file.type.startsWith("image/")){alert("একটি image নির্বাচন করুন।");return;}
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      const max=1200, scale=Math.min(1,max/Math.max(img.width,img.height));
+      const c=document.createElement("canvas");c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+      try{localStorage.setItem(WALL_KEY,c.toDataURL("image/jpeg",0.78));applyWallpaper();}
+      catch(err){alert("ছবিটি খুব বড়। ছোট ছবি দিয়ে আবার চেষ্টা করুন।");}
+    };
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+});
+function applyWallpaper(){
+  const w=localStorage.getItem(WALL_KEY);
+  if(w){document.body.style.backgroundImage=`linear-gradient(#eef3f8cc,#eef3f8cc),url("${w}")`;document.body.style.backgroundSize="cover";document.body.style.backgroundAttachment="fixed";}
+}
+$("clearWallpaperBtn").addEventListener("click",()=>{
+  localStorage.removeItem(WALL_KEY);document.body.style.backgroundImage="";alert("Wallpaper clear হয়েছে।");
+});
+
+/* ===== Scan Product OCR v2 ===== */
+const OCR_CDN="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+let ocrPromise=null, ocrWorker=null;
+function loadOCR(){
+  if(window.Tesseract)return Promise.resolve(window.Tesseract);
+  if(ocrPromise)return ocrPromise;
+  ocrPromise=new Promise((resolve,reject)=>{
+    const sc=document.createElement("script");
+    sc.src=OCR_CDN;
+    sc.onload=()=>window.Tesseract?resolve(window.Tesseract):reject(new Error("OCR library পাওয়া যায়নি।"));
+    sc.onerror=()=>reject(new Error("OCR library load হয়নি। প্রথমবার Internet connection দরকার।"));
+    document.head.appendChild(sc);
+  });
+  return ocrPromise;
+}
+function cleanOCRText(t){
+  return String(t||"").replace(/\r/g,"").split("\n").map(x=>x.replace(/[|]+/g," ").replace(/\s+/g," ").trim()).filter(Boolean);
+}
+function knownBrand(lines){
+  const brands=["Samsung","LG","Acer","AOC","Dell","HP","Lenovo","ASUS","BenQ","MSI","ViewSonic","Philips","Sony","Xiaomi","POCO","Realme","OnePlus","Vivo","Oppo","Motorola","Nokia","Hikvision","CP Plus","Logitech","Canon","Epson","Brother","Apple"];
+  const all=lines.join(" ");
+  for(const b of brands){
+    if(new RegExp("(^|\\W)"+b.replace(/[+]/g,"\\+")+"($|\\W)","i").test(all))return b;
+  }
+  return "";
+}
+function extractModel(lines,brand){
+  for(const x of lines){
+    const m=x.match(/\b(?:model(?:\s*(?:no|number))?|part\s*no|model\s*name)\s*[:#\-]?\s*([A-Z0-9][A-Z0-9._\-/]{2,})/i);
+    if(m)return m[1].trim();
+  }
+  const brandRe=brand?new RegExp("^"+brand.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s+","i"):null;
+  for(const x of lines){
+    let z=x.trim().replace(/[^A-Za-z0-9._\-/ ]/g,"").replace(/\s+/g," ");
+    if(brandRe)z=z.replace(brandRe,"").trim();
+    if(/^([A-Z0-9]{2,}[._\-/]?[A-Z0-9]{1,})$/i.test(z)&&/\d/.test(z)&&z.length<35)return z;
+  }
+  return "";
+}
+function extractDescription(lines){
+  const all=lines.join(" "),hits=[];let m;
+  const re=/(\d+(?:[.,]\d+)?)\s*(cm|mm|inch|in\.?|")\b/gi;
+  while((m=re.exec(all))&&hits.length<3)hits.push(m[1].replace(",",".")+" "+m[2]);
+  const res=all.match(/\b(\d{2,5}\s*[x×]\s*\d{2,5}(?:\s*(?:px|pixels))?)\b/i);
+  if(res)hits.push(res[1]);
+  return hits.join(", ");
+}
+function extractProduct(lines){
+  const all=lines.join(" ");
+  if(/\bmonitor\b/i.test(all))return "Monitor";
+  if(/\btelevision\b|\btv\b/i.test(all))return "TV";
+  if(/\blaptop\b/i.test(all))return "Laptop";
+  if(/\bkeyboard\b/i.test(all))return "Keyboard";
+  if(/\bmouse\b/i.test(all))return "Mouse";
+  if(/\bprinter\b/i.test(all))return "Printer";
+  if(/\bcamera\b/i.test(all))return "Camera";
+  return "";
+}
+function populateScan(text){
+  const lines=cleanOCRText(text),brand=knownBrand(lines);
+  $("scanProduct").value=extractProduct(lines);
+  $("scanBrand").value=brand;
+  $("scanModel").value=extractModel(lines,brand);
+  $("scanDesc").value=extractDescription(lines);
+  $("scanPrice").value=""; $("scanStock").value="";
+  $("scanRaw").value=lines.join("\n"); $("scanRaw").style.display=lines.length?"block":"none";
+}
+function makeCanvas(file,deg){
+  return new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(file),img=new Image();
+    img.onload=()=>{
+      const max=2600,scale=Math.min(1,max/Math.max(img.width,img.height));
+      const sw=Math.max(1,Math.round(img.width*scale)),sh=Math.max(1,Math.round(img.height*scale));
+      const rad=deg*Math.PI/180,swap=deg%180!==0,c=document.createElement("canvas");
+      c.width=swap?sh:sw;c.height=swap?sw:sh;
+      const ctx=c.getContext("2d");ctx.translate(c.width/2,c.height/2);ctx.rotate(rad);ctx.drawImage(img,-sw/2,-sh/2,sw,sh);
+      URL.revokeObjectURL(url);resolve(c);
+    };img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("ছবি পড়া যায়নি।"));};img.src=url;
+  });
+}
+async function getWorker(T){
+  if(ocrWorker)return ocrWorker;
+  ocrWorker=await T.createWorker("eng",1,{logger:m=>{
+    if(m&&m.status&&typeof m.progress==="number")$("scanStatus").textContent="OCR প্রস্তুত হচ্ছে… "+Math.round(m.progress*100)+"%";
+  }});
+  return ocrWorker;
+}
+async function runOCR(file){
+  const status=$("scanStatus");
+  try{
+    status.textContent="OCR প্রস্তুত হচ্ছে… প্রথমবার একটু সময় লাগতে পারে।";
+    const T=await loadOCR(),worker=await getWorker(T);
+    const canvas=await makeCanvas(file,0);
+    status.textContent="ছবির লেখা পড়া হচ্ছে…";
+    const r=await worker.recognize(canvas,{rotateAuto:true});
+    const text=r?.data?.text||"";
+    populateScan(text);
+    if(!text.trim())throw new Error("ছবিতে পরিষ্কার লেখা পাওয়া যায়নি।");
+    status.textContent="পড়া শেষ। নিচের তথ্যগুলো দেখে প্রয়োজন হলে ঠিক করে Add to Stock চাপুন।";
+  }catch(e){
+    console.error(e);
+    status.textContent="OCR কাজ করেনি। ছবিটা আরও কাছে/সোজা করে তুলুন এবং Internet connection আছে কি না দেখুন।\nসমস্যা: "+(e.message||e);
+  }
+}
+function openScan(){$("scanModal").classList.add("show");}
+function closeScan(){$("scanModal").classList.remove("show");}
+$("scanBtn").addEventListener("click",openScan);
+$("scanCancelBtn").addEventListener("click",closeScan);
+$("scanModal").addEventListener("click",e=>{if(e.target===$("scanModal"))closeScan();});
+["scanCamera","scanGallery"].forEach(id=>$(id).addEventListener("change",e=>{
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  const url=URL.createObjectURL(f),img=$("scanPreview");img.src=url;img.style.display="block";
+  runOCR(f);e.target.value="";
+}));
+$("scanAddBtn").addEventListener("click",()=>{
+  const product=$("scanProduct").value.trim(),brand=$("scanBrand").value.trim(),model=$("scanModel").value.trim();
+  if(!product){alert("Product Name পূরণ করুন। Packet-এ না থাকলে নিজে লিখুন।");return;}
+  if(!brand){alert("Brand Name পূরণ করুন। Packet-এ না থাকলে নিজে লিখুন।");return;}
+  if(!model){alert("Model Number পূরণ করুন। Packet-এ না থাকলে নিজে লিখুন।");return;}
+  let p=data.find(x=>x.name.toLowerCase()===product.toLowerCase());
+  if(!p){p={id:uid("p"),name:product,brands:[]};data.push(p);}
+  let b=p.brands.find(x=>x.name.toLowerCase()===brand.toLowerCase());
+  if(!b){b={id:uid("b"),name:brand,models:[]};p.brands.push(b);}
+  b.models.push({id:uid("m"),model,description:$("scanDesc").value.trim(),price:Math.max(0,Number($("scanPrice").value)||0),color:"#ffffff",stock:Math.max(0,parseInt($("scanStock").value,10)||0)});
+  saveData();render();closeScan();
+  ["scanProduct","scanBrand","scanModel","scanDesc","scanPrice","scanStock"].forEach(id=>$(id).value="");$("scanPreview").style.display="none";$("scanRaw").style.display="none";$("scanStatus").textContent="ছবি নির্বাচন করুন।";
+  alert("Scan থেকে তথ্য Stock-এ যোগ হয়েছে।");
+});
+
+applyWallpaper();
+render();
+</script>
+</body>
+</html>
