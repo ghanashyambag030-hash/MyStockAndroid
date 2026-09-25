@@ -40,13 +40,12 @@ td{padding:8px;border-bottom:1px solid #e2e8f0;vertical-align:middle}
 .note{padding:8px 10px;font-size:13px;background:#fff7ed;border-left:4px solid #f97316;margin:10px}
 .wallpaper-btn{position:relative;overflow:hidden}
 #wallpaperInput{display:none}
-.duplicate{color:#b91c1c;background:#fee2e2!important}.info-btn{position:absolute;right:10px;top:10px;width:34px;height:34px;padding:0;border-radius:50%;background:#fff;color:#2563eb;font-size:21px;font-weight:800;line-height:34px}.info-modal .box{text-align:center;max-width:380px}.info-title{font-size:24px;font-weight:800;margin-bottom:12px}.info-line{margin:8px 0;font-size:15px}.info-close{margin-top:12px;width:100%}
+.duplicate{color:#b91c1c;background:#fee2e2!important}
 @media(max-width:600px){header h1{font-size:19px}.toolbar{position:static}button{padding:8px 10px}.wrap{padding:6px}}
 </style>
 </head>
 <body>
-<header style="position:relative">
-  <button id="infoBtn" class="info-btn" title="App Info">тУШ</button>
+<header>
   <h1>ЁЯУж Stock Manager</h1>
   <div class="sub">Product тЖТ Brand тЖТ Model | ржбрзЗржЯрж╛ ржлрзЛржирзЗржЗ рж╕ржВрж░ржХрзНрж╖рж┐ржд ржерж╛ржХржмрзЗ</div>
 </header>
@@ -72,17 +71,6 @@ td{padding:8px;border-bottom:1px solid #e2e8f0;vertical-align:middle}
 </tr></thead>
 <tbody id="stockBody"></tbody>
 </table>
-</div>
-
-<div id="infoModal" class="modal info-modal">
- <div class="box">
-   <div class="info-title">ЁЯУж My Stock</div>
-   <div class="info-line">ЁЯСд <b>Created by:</b> Ghanashyam Bag</div>
-   <div class="info-line">ЁЯУ▒ <b>App Version:</b> 1.0</div>
-   <div class="info-line">ЁЯУз <b>Contact:</b><br><a href="mailto:ghanashyambag030@gmail.com">ghanashyambag030@gmail.com</a></div>
-   <div class="info-line">┬й Created by Ghanashyam Bag</div>
-   <button id="closeInfoBtn" class="secondary info-close">Close</button>
- </div>
 </div>
 
 <div id="modal" class="modal">
@@ -150,12 +138,6 @@ function closeModal(){
 }
 $("cancelModalBtn").addEventListener("click", closeModal);
 $("modal").addEventListener("click", e => { if(e.target === $("modal")) closeModal(); });
-
-$("infoBtn").addEventListener("click", () => $("infoModal").classList.add("show"));
-$("closeInfoBtn").addEventListener("click", () => $("infoModal").classList.remove("show"));
-$("infoModal").addEventListener("click", e => {
-  if(e.target === $("infoModal")) $("infoModal").classList.remove("show");
-});
 
 $("saveModalBtn").addEventListener("click", ()=>{
   if(typeof modalState === "function"){
@@ -453,3 +435,21 @@ $("pdfBtn").addEventListener("click",()=>{
     .model-row td{background-color:var(--pdf-row-color) !important}
   }
   </style>
+  </head><body><h1>Selected Stock</h1><table><tr><th>Product</th><th>Brand</th><th>Model</th><th>Description</th><th>Price</th><th>Stock</th></tr>
+  ${rows.map(r=>{
+    const c=/^#[0-9a-fA-F]{6}$/.test(r.color||"")?r.color:"#ffffff";
+    return `<tr class="model-row" style="--pdf-row-color:${c};background-color:${c}"><td style="background-color:${c}">${esc(r.product)}</td><td style="background-color:${c}">${esc(r.brand)}</td><td style="background-color:${c}">${esc(r.model)}</td><td style="background-color:${c}">${esc(r.description)}</td><td style="background-color:${c}">${money(r.price)}</td><td style="background-color:${c}">${Number(r.stock)||0}</td></tr>`;
+  }).join("")}
+  </table><br><button onclick="window.print()">ЁЯЦия╕П Print / Save as PDF</button></body></html>`);
+  w.document.close();
+});
+
+$("wallpaperInput").addEventListener("change",e=>{
+  const file=e.target.files[0]; if(!file)return;
+  if(!file.type.startsWith("image/")){alert("ржПржХржЯрж┐ image ржирж┐рж░рзНржмрж╛ржЪржи ржХрж░рзБржиред");return;}
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      const max=1200, scale=Math.min(1,max/Math.max(img.width,img.height));
+      const c=document.createElement("canvas");c.width=Math.round(img.width*scale);c.he
